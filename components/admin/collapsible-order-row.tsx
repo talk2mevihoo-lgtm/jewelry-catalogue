@@ -228,8 +228,6 @@ export function CollapsibleOrderRow({ order, stages, materials, sizes }: Collaps
                                                 // The 'materials' prop has the structure, so we can find the parent material name.
                                                 // metal object here comes from materials.flatMap, so it might NOT have 'material' property populated 
                                                 // unless we specifically included it in the flatMap logic or if prisma result has it deeper.
-                                                // Page.tsx query: prisma.material.findMany({ include: { metals: true } })
-                                                // so 'metal' does NOT have 'material' parent reference inside it by default unless we double include.
                                                 // BUT 'allMetals' came from 'materials'.
                                                 // We can look up which material this metal belongs to.
                                                 const parentMaterial = materials.find(mat => mat.metals.some((m: any) => m.id === metal?.id));
@@ -238,10 +236,10 @@ export function CollapsibleOrderRow({ order, stages, materials, sizes }: Collaps
                                                 acc[matName] = (acc[matName] || 0) + weight;
                                                 return acc;
                                             }, {} as Record<string, number>)
-                                        ).map(([mat, wt]) => (
+                                        ).map(([mat, wt]: [string, any]) => (
                                             <div key={mat} className="flex justify-between text-sm">
                                                 <span>{mat}</span>
-                                                <span className="font-bold">{wt.toFixed(2)}g</span>
+                                                <span className="font-bold">{(Number(wt) || 0).toFixed(2)}g</span>
                                             </div>
                                         ))}
                                     </div>
@@ -259,10 +257,10 @@ export function CollapsibleOrderRow({ order, stages, materials, sizes }: Collaps
                                                 acc[item.metalType] = (acc[item.metalType] || 0) + weight;
                                                 return acc;
                                             }, {} as Record<string, number>)
-                                        ).map(([type, wt]) => (
+                                        ).map(([type, wt]: [string, any]) => (
                                             <div key={type} className="flex justify-between text-sm">
                                                 <span>{type}</span>
-                                                <span className="font-medium text-slate-700">{wt.toFixed(2)}g</span>
+                                                <span className="font-medium text-slate-700">{(Number(wt) || 0).toFixed(2)}g</span>
                                             </div>
                                         ))}
                                     </div>
@@ -284,10 +282,10 @@ export function CollapsibleOrderRow({ order, stages, materials, sizes }: Collaps
                                                 acc[cat].weight += weight;
                                                 return acc;
                                             }, {} as Record<string, { count: number, weight: number }>)
-                                        ).map(([cat, stats]) => (
+                                        ).map(([cat, stats]: [string, any]) => (
                                             <div key={cat} className="flex justify-between text-sm">
                                                 <span>{cat} <span className="text-xs text-muted-foreground">({stats.count})</span></span>
-                                                <span className="font-medium text-slate-700">{stats.weight.toFixed(2)}g</span>
+                                                <span className="font-medium text-slate-700">{(stats.weight || 0).toFixed(2)}g</span>
                                             </div>
                                         ))}
                                     </div>

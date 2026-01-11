@@ -120,7 +120,10 @@ export default function DashboardPage() {
                                     // Calculate precise colors or use a palette
                                     const colors = ["bg-blue-400", "bg-indigo-400", "bg-purple-400", "bg-pink-400", "bg-orange-400", "bg-green-400"];
                                     const color = colors[i % colors.length];
-                                    const width = (stats.count / Object.values(data.stageStats).reduce((a: any, b: any) => a + b.count, 0) as number) * 100;
+                                    const totalCount = Object.values(data.stageStats).reduce((a: any, b: any) => a + (b.count || 0), 0) as number;
+                                    if (!totalCount) return null;
+
+                                    const width = (stats.count / totalCount) * 100;
 
                                     return (
                                         <div key={stage.id} className={`${color} h-full`} style={{ width: `${width}%` }} title={`${stage.name}: ${stats.count}`} />

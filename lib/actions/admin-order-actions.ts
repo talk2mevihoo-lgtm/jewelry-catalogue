@@ -8,6 +8,19 @@ function generateOrderNumber() {
     return `ORD-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
 }
 
+export async function updateOrderStatus(orderId: string, status: string) {
+    try {
+        await prisma.order.update({
+            where: { id: orderId },
+            data: { status }
+        });
+        revalidatePath("/admin/orders");
+        return { success: true };
+    } catch (e) {
+        return { success: false, message: "Failed to update order status" };
+    }
+}
+
 export async function updateOrderItemStage(itemId: string, stage: string, reason?: string) {
     console.log("updateOrderItemStage called:", { itemId, stage, reason });
     try {
