@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums removed for SQLite compatibility. 
+// We will use String types and manage validation in application layer.
+
+// User & Role Management
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String // Hashed
+  role          String    @default("DISTRIBUTOR") // Was Role enum
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  distributorProfile DistributorProfile?
+  allowedProducts    Product[]
+  
+  tenantId      String?
+  tenant        Tenant?   @relation(fields: [tenantId], references: [id])
+}
+
+model Tenant {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  domain      String?  @unique
+  
+  // Branding
+  primaryColor   String @default("#D4AF36")
+  secondaryColor String @default("#F4F1EA")
+  fontFamily     String @default("Inter")
+  
+  logoUrl        String?
+  faviconUrl     String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  users       User[]
+}
+
+model DistributorProfile {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  
+  distributorCode String  @unique
+  companyName    String
+  address        String
+  region         String
+  gstNo          String?
+  contactPerson  String
+  contactNo      String
+  
+  orders         Order[]
+}
+
+// Jewelry Configuration
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  products  Product[]
+}
+
+model Material {
+  id        String    @id @default(uuid())
+  name      String    @unique // Wax, Silver, Gold
+  minOrderWeight Float @default(0)
+  isVisible Boolean   @default(true)
+  metals    Metal[]
+}
+
+model Metal {
+  id        String    @id @default(uuid())
+  name      String    // 925 Silver, 18K Gold
+  materialId String
+  material  Material  @relation(fields: [materialId], references: [id])
+  
+  conversionRatio Float @default(1.0)
+  purity         Float @default(0) // 0.0 to 1.0 (e.g. 0.916 for 22K)
+  isVisible      Boolean @default(true)
+}
+
+model MetalColor {
+  id    String @id @default(uuid())
+  name  String @unique // White, Yellow, Rose
+}
+
+model Size {
+  id        String @id @default(uuid())
+  name      String // 10, 12, 14, S, M, L
+  category  String // Linked to jewelry category conceptually
+}
+
+// Product Management
+model Product {
+  id          String   @id @default(uuid())
+  modelNo     String   @unique
+  title       String?
+  
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  
+  baseWeight  Float
+  
+  mainImage   String
+  additionalImages String // Comma separated URLs
+  cadFile     String? // URL
+  isActive    Boolean @default(true)
+  
+  // New Fields
+  tags        String? // Comma separated terms
+  visibility  String  @default("ALL") // "ALL" or "SELECTED"
+  allowedDistributors User[] // Implicit Many-to-Many
+  
+  // Variants (Size/Metal/Color combination logic handled in app or via strict relations if complex)
+  // For simplicity, we assume all products are available in configured metals/colors unless specified
+  
+  collections Collection[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orders      OrderItem[]
+}
+
+model Collection {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  isVisible Boolean   @default(true)
+  products  Product[]
+}
+
+// Order Management
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique // Auto-generated
+  
+  distributorId   String
+  distributor     DistributorProfile @relation(fields: [distributorId], references: [id])
+  
+  status          String      @default("PENDING") // Was OrderStatus enum
+  stageReason     String?     // For On Hold / Pending reasons
+  
+  instructionNote String?
+  requestedDeliveryDate DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  items           OrderItem[]
+  stages          OrderStageHistory[]
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id])
+  
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  
+  metalType   String  // Snapshot of metal name
+  metalColor  String  // Snapshot of color
+  size        String  // Snapshot of size
+  quantity    Int
+  
+  stage       String  @default("PENDING")
+  stageReason String?
+
+  instructions String?
+}
+
+model OrderStageHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id])
+  
+  stage     String      // Was OrderStatus enum
+  reason    String?
+  changedAt DateTime    @default(now())
+  changedBy String?     // User ID of admin who changed it
+}
+
+model OrderStageDefinition {
+  id              String  @id @default(uuid())
+  name            String
+  type            String  // STANDARD, PENDING, ON_HOLD, CANCELLED, COMPLETED
+  sequence        Int
+  isVisible       Boolean @default(true)
+  requiresReason  Boolean @default(false)
+  reasons         String? // Comma-separated list of pre-defined reasons
+}

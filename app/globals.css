@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Premium Gold & Ivory Palette */
+    --background: 60 30% 98%; /* Ivory-ish white */
+    --foreground: 220 15% 25%; /* Charcoal */
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 25%;
+
+    --primary: 43 74% 49%; /* Gold base #D4AF36 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 20% 94%; /* Light Ivory/Beige */
+    --secondary-foreground: 220 15% 25%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 43 74% 49%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 43 30% 85%; /* Soft Gold border */
+    --input: 220 14% 96%;
+    --ring: 43 74% 49%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark Luxury Mode */
+    --background: 220 15% 10%; /* Dark Charcoal */
+    --foreground: 60 30% 98%;
+
+    --card: 220 15% 13%;
+    --card-foreground: 60 30% 98%;
+
+    --popover: 220 15% 13%;
+    --popover-foreground: 60 30% 98%;
+
+    --primary: 43 74% 49%;
+    --primary-foreground: 220 15% 10%;
+
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 60 30% 98%;
+
+    --muted: 220 15% 18%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 43 74% 49%;
+    --accent-foreground: 220 15% 10%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 43 74% 49%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
