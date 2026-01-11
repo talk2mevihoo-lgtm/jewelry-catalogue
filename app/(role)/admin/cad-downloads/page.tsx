@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { saveAs } from "file-saver";
 import { getOrdersWithCads } from "@/lib/actions/cad-actions";
 import { SearchInput } from "@/components/admin/search-input";
 
-export default function CadDownloadsPage() {
+function CadContent() {
     const searchParams = useSearchParams();
     const query = searchParams.get("q")?.toString();
 
@@ -76,11 +76,7 @@ export default function CadDownloadsPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-serif text-primary">CAD File Manager</h1>
-            </div>
-
+        <>
             <div className="flex w-full max-w-sm items-center space-x-2">
                 <SearchInput placeholder="Search Order No or Model No..." />
             </div>
@@ -127,6 +123,20 @@ export default function CadDownloadsPage() {
                     )}
                 </CardContent>
             </Card>
+        </>
+    );
+}
+
+export default function CadDownloadsPage() {
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-serif text-primary">CAD File Manager</h1>
+            </div>
+
+            <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Loading...</div>}>
+                <CadContent />
+            </Suspense>
         </div>
     );
 }
